@@ -6,6 +6,7 @@ public class Student extends User {
 
     public Student(String firstName, String secondName, String patronymic, Long studentID) {
         super(firstName, secondName, patronymic);
+        this.studentID = studentID;
     }
 
     public Long getStudentID() {

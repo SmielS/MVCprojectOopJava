@@ -4,11 +4,13 @@ public abstract class User {
     private String firstName;
     private String secondName;
     private String patronymic;
+    private Long studyGroupId;
 
     public User(String firstName, String secondName, String patronymic) {
         this.firstName = firstName;
         this.secondName = secondName;
         this.patronymic = patronymic;
+        this.studyGroupId = -1L;
     }
 
     public String getFirstName() {
@@ -35,12 +37,29 @@ public abstract class User {
         this.patronymic = patronymic;
     }
 
+    public Long getStudyGroupId() {
+        return studyGroupId;
+    }
+
+    public void setStudyGroupId(Long studyGroupId) {
+        this.studyGroupId = studyGroupId;
+    }
+
     @Override
     public String toString() {
-        return "User{" +
-                "firstName='" + firstName + '\'' +
-                ", secondName='" + secondName + '\'' +
-                ", patronymic='" + patronymic + '\'' +
-                '}';
+        if (this.studyGroupId.equals(-1L)) {
+            return "User{" +
+                    "firstName='" + this.firstName + '\'' +
+                    ", lastName='" + this.secondName + '\'' +
+                    ", patronymic='" + this.patronymic + '\'' +
+                    "}";
+        } else {
+            return "User{" +
+                    "firstName='" + this.firstName +
+                    "', lastName='" + this.secondName +
+                    "', patronymic='" + this.patronymic +
+                    "', studyGroup=" + this.studyGroupId +
+                    "}";
+        }
     }
 }

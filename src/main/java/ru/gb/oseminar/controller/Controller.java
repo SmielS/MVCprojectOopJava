@@ -1,39 +1,90 @@
 package ru.gb.oseminar.controller;
 
-import ru.gb.oseminar.data.Student;
-import ru.gb.oseminar.data.StudyGroup;
-import ru.gb.oseminar.data.Teacher;
-import ru.gb.oseminar.data.User;
+import ru.gb.oseminar.data.*;
 import ru.gb.oseminar.service.StudyGroupService;
 import ru.gb.oseminar.service.UserService;
 import ru.gb.oseminar.view.StudentView;
+import ru.gb.oseminar.view.StudyGroupView;
+import ru.gb.oseminar.view.UserView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Controller {
     private final UserService userService = new UserService();
-    private final StudentView studentView = new StudentView();
     private final StudyGroupService studyGroupService = new StudyGroupService();
+    private final UserView userView = new UserView();
+    private final StudentView studentView = new StudentView();
+    private final StudyGroupView studyGroupView = new StudyGroupView();
 
-    public void createUser(String firstname, String lastName, String patronymic) {
-        userService.createUser(firstname, lastName, patronymic);
+
+    public void createStudent(String firstName, String secondName, String patronymic) {
+        userService.createStudent(firstName, secondName, patronymic);
+    }
+
+    public void createTeacher(String firstName, String secondName, String patronymic){
+        userService.createTeacher(firstName, secondName, patronymic);
+    }
+
+    public List<Student> getAllStudents(){ return userService.getAllStudents();}
+    public List<Teacher> getAllTeachers(){ return userService.getAllTeachers();}
+    public void deleteAllUsers() {
+        this.userService.deleteAllUsers();
+    }
+
+    public void createStudyGroup() {
+        Long studyGroupID = this.studyGroupService.getStudyGroupMaxID();
+        studyGroupID ++;
+        List<Teacher> teachers = this.userService.getAllTeachers();
+        Teacher teacherForGroup = null;
+
+        for (Teacher teacher : teachers) {
+            if (teacher.getStudyGroupId().equals(-1L)) {
+                teacher.setStudyGroupId(studyGroupID);
+                teacherForGroup = teacher;
+            }
+        }
+        if (teacherForGroup == null) {
+            throw new IllegalStateException("Teacher not found for creating a StudyGroup");
+        }
+
+        List<Student> students = this.userService.getAllStudents();
+        List<Student> studentsForGroup = new ArrayList<>();
+        for (Student student : students) {
+            if (student.getStudyGroupId().equals(-1L))  {
+                student.setStudyGroupId(studyGroupID);
+                studentsForGroup.add(student);
+            }
+        }
+        if (studentsForGroup.isEmpty()) {
+            throw new IllegalStateException("Students not found for creating a StudyGroup");
+        }
+
+        this.studyGroupService.createStudyGroup(teacherForGroup, studentsForGroup);
+        this.studyGroupView.sendOnConsole(this.studyGroupService.getStudyGroups());
+    }
+
+    public void showAllStudents() {
         List<User> students = userService.getAll();
         studentView.sendOnConsole(students);
     }
 
-    public void createGroup() {
-        List<User> users = this.userService.getAll();
-        Teacher teacher = null;
-        List<Student> students = new ArrayList<>();
+    public List<StudyGroup> getAllStudyGroups() {
+        return this.studyGroupService.getStudyGroups();
+    }
 
-        for (User user : users) {
-            if (user instanceof Teacher)
-                teacher = (Teacher) user;
-            else if (user instanceof Student)
-                students.add((Student) user);
+    public void showSortStudyGroup (List<Student> students) {
+        students.sort(new UsersComparator());
+        this.userView.showStudents(students);
+    }
+
+    public void showSortedStudents (List<StudyGroup> studyGroups) {
+        List<Student> students = new ArrayList<>();
+        for (StudyGroup studyGroup : studyGroups) {
+            students.addAll(studyGroup.getStudents());
         }
-        this.studyGroupService.createStudyGroup(teacher, students);
-        StudyGroup studyGroup = (StudyGroup) this.studyGroupService.getStudyGroups();
+        students.sort(new UsersComparator());
+        this.userView.showStudentsWithGroup(students);
     }
 }

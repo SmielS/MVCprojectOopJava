@@ -1,7 +1,6 @@
 package ru.gb.oseminar.data;
 
 public class Teacher extends User {
-
     private Long teacherID;
 
     public Teacher(String firstName, String secondName, String patronymic, Long teacherID) {
